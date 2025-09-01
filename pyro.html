@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🔥 Pyro Spin Wheel 🔥</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Orbitron',sans-serif;
+      background: radial-gradient(circle at top,#0f0c29,#302b63,#24243e);
+      color:#fff;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      min-height:100vh;
+      padding:4vh 2vw;
+      text-align:center;
+    }
+    h1 {
+      font-size:clamp(1.5rem,4vw,2.2rem);
+      background:linear-gradient(90deg,#ff512f,#ffeb3b,#ff512f);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      animation:glow 2.5s ease-in-out infinite alternate;
+      letter-spacing:3px;
+      white-space:nowrap;
+      margin-bottom:20px;
+    }
+    @keyframes glow {
+      0% { text-shadow:0 0 10px #ff512f,0 0 20px #ffdd76; }
+      50% { text-shadow:0 0 20px #ffeb3b,0 0 35px #ff512f; }
+      100% { text-shadow:0 0 10px #ff512f,0 0 20px #ffdd76; }
+    }
+    .wheel-wrapper {
+      position:relative;
+      width:min(80vw,320px);
+      height:min(80vw,320px);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      margin:20px 0;
+      animation:pulse 3s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100%{transform:scale(1);}
+      50%{transform:scale(1.04);}
+    }
+    .pointer {
+      position:absolute;
+      top:-32px;
+      width:0;height:0;z-index:10;
+      border-left:18px solid transparent;
+      border-right:18px solid transparent;
+      border-bottom:36px solid #ffeb3b;
+      filter:drop-shadow(0 0 12px #ffeb3b);
+      animation:pointerGlow 1.5s ease-in-out infinite alternate;
+    }
+    @keyframes pointerGlow {
+      0%{filter:drop-shadow(0 0 8px #ffeb3b);}
+      100%{filter:drop-shadow(0 0 20px #ffdd76);}
+    }
+    .wheel-container {
+      width:100%; height:100%;
+      border-radius:50%;
+      border:8px solid #fff;
+      box-shadow:0 0 25px rgba(255,255,255,0.5);
+      background:#111;
+      overflow:hidden;
+    }
+    canvas{width:100%;height:100%;}
+    button {
+      padding:12px 28px;
+      margin:8px;
+      border:none;
+      border-radius:50px;
+      background:linear-gradient(135deg,#ff512f,#dd2476);
+      color:#fff;
+      font-size:clamp(0.9rem,2.5vw,1.1rem);
+      font-weight:bold;
+      cursor:pointer;
+      transition:0.3s;
+      font-family:'Orbitron',sans-serif;
+      box-shadow:0 0 12px #ff512f;
+    }
+    button:hover:not(:disabled){transform:scale(1.1); box-shadow:0 0 25px #ffeb3b,0 0 35px #ff512f;}
+    button:disabled{background:gray; cursor:not-allowed;}
+    #result{
+      margin-top:12px;
+      font-size:1.2rem;
+      color:#ffeb3b;
+      font-weight:bold;
+      text-shadow:0 0 6px #ffdd76;
+    }
+    .popup{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.75);
+      backdrop-filter:blur(5px);
+      justify-content:center;
+      align-items:center;
+      z-index:1000;
+    }
+    .popup-content{
+      background:#1e1e2f;
+      padding:18px;
+      border-radius:12px;
+      text-align:center;
+      width:90%;
+      max-width:320px;
+      box-shadow:0 0 25px rgba(255,255,255,0.4);
+    }
+    .popup-content h2{
+      color:#ffeb3b;
+      margin-bottom:12px;
+      font-size:1.2rem;
+      text-shadow:0 0 6px #ffdd76;
+    }
+    .popup-content button{
+      margin-top:8px;
+      background:linear-gradient(135deg,#4caf50,#81c784);
+      box-shadow:0 0 12px #4caf50;
+    }
+    input{
+      width:90%;
+      padding:8px;
+      margin-top:8px;
+      border:none;
+      border-radius:6px;
+      background:#333;
+      color:#fff;
+      text-align:center;
+    }
+    input:focus{outline:2px solid #ffeb3b;}
+  </style>
+</head>
+<body>
+<h1>🔥 Pyro Spin Wheel 🔥</h1>
+
+<div class="wheel-wrapper">
+  <div class="pointer"></div>
+  <div class="wheel-container">
+    <canvas id="wheel" width="400" height="400"></canvas>
+  </div>
+</div>
+
+<button id="spinBtn">🎡 SPIN</button>
+<div id="result"></div>
+<button id="withdrawBtn" disabled>💰 Withdraw</button>
+
+<!-- Popups -->
+<div id="join1Popup" class="popup">
+  <div class="popup-content">
+    <h2>Join Instagram</h2>
+    <p>Click below to join:</p>
+    <button onclick="openInsta()">📷 Join Instagram</button>
+    <button id="join1Btn" disabled onclick="verifyJoin1()">I’ve Joined</button>
+  </div>
+</div>
+<div id="join2Popup" class="popup">
+  <div class="popup-content">
+    <h2>Join YouTube</h2>
+    <p>Click below to join:</p>
+    <button onclick="openYT()">▶️ Join YouTube</button>
+    <button id="join2Btn" disabled onclick="verifyJoin2()">I’ve Joined</button>
+  </div>
+</div>
+<div id="upiPopup" class="popup">
+  <div class="popup-content">
+    <h2>Withdraw</h2>
+    <input type="text" id="upiInput" placeholder="example@upi">
+    <button onclick="submitUPI()">Submit</button>
+  </div>
+</div>
+
+<script>
+const canvas=document.getElementById('wheel'),ctx=canvas.getContext('2d');
+const spinBtn=document.getElementById('spinBtn'), resultDiv=document.getElementById('result');
+const withdrawBtn=document.getElementById('withdrawBtn');
+
+const mysteryGifts=["🎁 Gift Card","🖼️ NFT Art","🎮 Game Item","🎫 Movie Ticket"];
+const rewards=["Better Luck Next Time","₹50","Better Luck Next Time","₹15","🎉 Surprise","₹30","Better Luck Next Time","🎁 Mystery Gift"];
+const arc=(2*Math.PI)/rewards.length;
+let spinning=false, currentAngle=0;
+
+function drawWheel(angle=0){
+  const radius=canvas.width/2;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.save();
+  ctx.translate(radius,radius);
+  ctx.rotate(angle);
+  ctx.translate(-radius,-radius);
+  for(let i=0;i<rewards.length;i++){
+    const grad=ctx.createLinearGradient(0,0,canvas.width,canvas.height);
+    grad.addColorStop(0,i%2===0?'#ff512f':'#dd2476');
+    grad.addColorStop(1,i%2===0?'#ffdd76':'#ff5c97');
+    ctx.fillStyle=grad;
+    ctx.beginPath();
+    ctx.moveTo(radius,radius);
+    ctx.arc(radius,radius,radius,i*arc,(i+1)*arc);
+    ctx.fill();
+    ctx.save();
+    ctx.translate(radius,radius);
+    ctx.rotate(i*arc + arc/2);
+    ctx.fillStyle="#fff";
+    ctx.font="bold 12px Orbitron";
+    ctx.textAlign="center";
+    ctx.fillText(rewards[i],radius-60,5);
+    ctx.restore();
+  }
+  ctx.restore();
+}
+drawWheel();
+
+spinBtn.onclick=()=>{
+  if(spinning) return;
+  spinning=true; withdrawBtn.disabled=true; resultDiv.innerText="";
+  const spins=Math.floor(Math.random()*3)+5;
+  const stop=Math.random()*2*Math.PI;
+  const finalAngle=spins*2*Math.PI+stop;
+  const duration=4000;
+  const startTime=performance.now();
+  const startAngle=currentAngle;
+
+  function animate(time){
+    const elapsed=time-startTime;
+    if(elapsed>=duration){
+      currentAngle=finalAngle%(2*Math.PI);
+      drawWheel(currentAngle);
+      spinning=false;
+      showReward();
+      return;
+    }
+    const t=elapsed/duration;
+    const eased=1-Math.pow(1-t,3);
+    currentAngle=startAngle+(finalAngle-startAngle)*eased;
+    drawWheel(currentAngle);
+    requestAnimationFrame(animate);
+  }
+  requestAnimationFrame(animate);
+};
+
+function showReward(){
+  const deg=(currentAngle*180/Math.PI + 90)%360;
+  const index=Math.floor((360-deg)/(360/rewards.length))%rewards.length;
+  let reward=rewards[index];
+  if(reward==="🎁 Mystery Gift"){
+    reward=mysteryGifts[Math.floor(Math.random()*mysteryGifts.length)];
+  }
+  if(reward.includes("Better Luck")){
+    resultDiv.innerText="😞 Better Luck Next Time!";
+    withdrawBtn.disabled=true;
+  } else {
+    resultDiv.innerText=`🎉 You Won: ${reward}`;
+    withdrawBtn.disabled=false;
+  }
+}
+
+withdrawBtn.onclick=()=>document.getElementById('join1Popup').style.display='flex';
+
+function openInsta(){
+  window.open('https://www.instagram.com/meuyaaa___?igsh=eTl4bW5jcmtsMjV5');
+  document.getElementById('join1Btn').disabled=false;
+}
+function verifyJoin1(){
+  document.getElementById('join1Popup').style.display='none';
+  document.getElementById('join2Popup').style.display='flex';
+}
+function openYT(){
+  window.open('https://youtube.com/@pyro-ff..gaming?si=mbpxZ5BGCvkbw72u');
+  document.getElementById('join2Btn').disabled=false;
+}
+function verifyJoin2(){
+  document.getElementById('join2Popup').style.display='none';
+  document.getElementById('upiPopup').style.display='flex';
+}
+function submitUPI(){
+  const upi=document.getElementById('upiInput').value.trim();
+  if(!upi.includes('@')) return alert('Enter valid UPI ID');
+  alert(`Withdraw request sent for ${upi}`);
+  document.getElementById('upiPopup').style.display='none';
+}
+</script>
+</body>
+</html>
